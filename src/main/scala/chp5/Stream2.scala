@@ -1,6 +1,12 @@
 package chp5
 
 sealed trait Stream2[+A] {
+  def foldRight[B](z: => B)(f: (A, => B) => B): B = {
+    this match {
+      case Cons(h, t) => f(h(), t().foldRight(z)(f))
+      case _ => z
+    }
+  }
 
   def toList: List[A] = {
     @annotation.tailrec
@@ -32,6 +38,48 @@ sealed trait Stream2[+A] {
       case Cons(h, t) if p(h()) => Stream2.cons(h(), t().takeWhile(p))
       case _ => Stream2.empty
     }
+  }
+
+  def takeWhileWithFold(f: A => Boolean): Stream2[A] = {
+    foldRight(Stream2.empty[A])(
+      (h, t) => if (f(h)) Stream2.cons(h, t) else Stream2.empty
+    )
+  }
+
+  def exists(p: A => Boolean): Boolean = {
+    foldRight(false)((h, tailResult) => p(h) || tailResult)
+  }
+
+  def forAll(p: A => Boolean): Boolean = {
+    foldRight(true)((h, tailResult) => p(h) && tailResult)
+  }
+
+  def headOption: Option[A] = {
+    foldRight[Option[A]](None)(
+      (h, _) => Some(h)
+    )
+  }
+
+  def map[B](f: A => B): Stream2[B] = {
+    foldRight[Stream2[B]](Stream2.empty)(
+      (h, t) => Stream2.cons(f(h), t)
+    )
+  }
+
+  def filter(p: A => Boolean): Stream2[A] = {
+    foldRight[Stream2[A]](Stream2.empty)(
+      (h, t) => if (p(h)) Stream2.cons(h, t) else t
+    )
+  }
+
+    def append[B >: A](z: => Stream2[B]): Stream2[B] = {
+      foldRight(z)((h,t) => Stream2.cons(h, t))
+    }
+
+  def flatMap[B](f: A => Stream2[B]): Stream2[B] = {
+    foldRight[Stream2[B]](Stream2.empty)(
+      (h, t) => f(h).append(t)
+    )
   }
 }
 
