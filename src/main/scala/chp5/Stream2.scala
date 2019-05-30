@@ -99,4 +99,19 @@ object Stream2 {
     if (as.isEmpty) empty
     else cons(as.head, apply(as.tail: _*))
   }
+
+  def constant[A](a: A): Stream2[A] = {
+    cons(a, constant(a))
+  }
+
+  def constantWithUnfold[A](a: A): Stream2[A] = {
+    unfold(a)(_ => Some((a, a)))
+  }
+
+  def unfold[A,S](z: S)(f: S => Option[(A,S)]): Stream2[A] = {
+    f(z) match {
+      case Some((v, next)) => cons(v, unfold(next)(f))
+      case None => Stream2.empty
+    }
+  }
 }

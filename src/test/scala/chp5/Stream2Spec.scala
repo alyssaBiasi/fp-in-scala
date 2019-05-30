@@ -88,6 +88,15 @@ class Stream2Spec extends Specification {
       }
     }
 
+    "unfold" should {
+      "generate a stream" in {
+        val stream = Stream2.unfold(0)(x => Some((x, x+1)))
+
+        val result = stream.take(5)
+        result.toList must containTheSameElementsAs(List(0,1,2,3,4))
+      }
+    }
+
   }
 
 }
