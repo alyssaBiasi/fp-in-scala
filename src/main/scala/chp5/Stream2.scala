@@ -94,9 +94,9 @@ sealed trait Stream2[+A] {
     )
   }
 
-    def append[B >: A](z: => Stream2[B]): Stream2[B] = {
-      foldRight(z)((h,t) => Stream2.cons(h, t))
-    }
+  def append[B >: A](z: => Stream2[B]): Stream2[B] = {
+    foldRight(z)((h,t) => Stream2.cons(h, t))
+  }
 
   def flatMap[B](f: A => Stream2[B]): Stream2[B] = {
     foldRight[Stream2[B]](Stream2.empty)(
@@ -120,6 +120,13 @@ sealed trait Stream2[+A] {
       ))
       case (Empty, Empty) => None
     }
+  }
+
+  def startsWith[B >: A](s: Stream2[B]): Boolean = {
+    val matches = this.zipAll(s).takeWhile {
+      case (x, y) => x == y
+    }
+    matches.headOption.isDefined
   }
 }
 

@@ -148,6 +148,19 @@ class Stream2Spec extends Specification {
       }
     }
 
+    "startsWith" should {
+      "return true" in {
+        val stream1 = Stream2.apply(1,2,3)
+
+        stream1.startsWith(Stream2.apply(1)) must beTrue
+      }
+
+      "return false" in {
+        val stream1 = Stream2.apply(1,2,3)
+
+        stream1.startsWith(Stream2.apply(2)) must beFalse
+      }
+    }
   }
 
 }
