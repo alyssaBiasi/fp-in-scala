@@ -2,3 +2,5 @@
 *.iml
 *.swp
 out/
+project/
+target/
