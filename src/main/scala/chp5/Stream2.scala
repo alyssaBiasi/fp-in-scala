@@ -36,7 +36,7 @@ sealed trait Stream2[+A] {
 
   def drop(n: Int): Stream2[A] = {
     this match {
-      case Cons(_, t) if n > 1 => t().drop(n - 1)
+      case Cons(_, t) if n > 0 => t().drop(n - 1)
       case _ => this
     }
   }
@@ -127,6 +127,15 @@ sealed trait Stream2[+A] {
       case (x, y) => x == y
     }
     matches.headOption.isDefined
+  }
+
+  def tails: Stream2[Stream2[A]] = {
+    val suffixes = Stream2.unfold[Stream2[A], Stream2[A]](this) {
+      case Empty => None
+      case s => Some((s, s.drop(1)))
+    }
+
+    suffixes.append(Stream2.apply(Stream2.empty))
   }
 }
 

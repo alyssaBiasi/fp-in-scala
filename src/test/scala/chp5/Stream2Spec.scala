@@ -25,8 +25,15 @@ class Stream2Spec extends Specification {
     }
 
     "drop" in {
-      val result = Stream2.apply(1,2,3,4,5,6).drop(4).toList
-      result must containTheSameElementsAs(List(4,5,6))
+      "removes multiple elements" in {
+        val result = Stream2.apply(1, 2, 3, 4, 5, 6).drop(4).toList
+        result must containTheSameElementsAs(List(5, 6))
+      }
+
+      "removes the first element" in {
+        val result = Stream2.apply(1,2,3,4,5,6).drop(1).toList
+        result must containTheSameElementsAs(List(2,3,4,5,6))
+      }
     }
 
     "takeWhile" should {
@@ -159,6 +166,20 @@ class Stream2Spec extends Specification {
         val stream1 = Stream2.apply(1,2,3)
 
         stream1.startsWith(Stream2.apply(2)) must beFalse
+      }
+    }
+
+    "tails" should {
+      "return the suffixes" in {
+        val stream = Stream2.apply(1,2,3)
+        val expected = List(
+          List(1,2,3),
+          List(2,3),
+          List(3),
+          Nil
+        )
+
+        stream.tails.map(_.toList).toList must containTheSameElementsAs(expected)
       }
     }
   }
