@@ -4,6 +4,12 @@ version := "0.1"
 
 scalaVersion := "2.12.8"
 
+val specs2Version = "4.3.6"
+libraryDependencies ++= Seq(
+  "org.specs2"  %% "specs2-core"           % specs2Version    % "test",
+  "org.specs2"  %% "specs2-matcher-extra"  % specs2Version    % "test"
+)
+
 scalacOptions ++= Seq(
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.
   "-encoding", "utf-8",                // Specify character encoding used by source files.
