@@ -31,6 +31,16 @@ object RNG {
     map2(ra, rb)((_, _))
   }
 
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = {
+//    fs match {
+//      case Nil => unit(Nil)
+//      case h :: t => map2(h, sequence(t))(_ :: _)
+//    }
+    fs.foldRight[Rand[List[A]]](unit(Nil))(
+      (r, acc) => map2(r, acc)(_ :: _)
+    )
+  }
+
   // `Int.Minvalue` is 1 smaller than `-(Int.MaxValue)`
   def nonNegativeInt(rng: RNG): (Int, RNG) = {
     val (i, r) = rng.nextInt
@@ -65,14 +75,7 @@ object RNG {
     ((d1, d2, d3), r3)
   }
 
-  def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
-    if (count == 0)
-      (Nil, rng)
-    else {
-      val (i, r) = nonNegativeInt(rng)
-      val (xs, r2) = ints(count - 1)(r)
-
-      (i :: xs, r2)
-    }
+  def ints(count: Int): Rand[List[Int]] = {
+    sequence(List.fill(count)(int))
   }
 }
