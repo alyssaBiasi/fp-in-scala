@@ -137,6 +137,20 @@ sealed trait Stream2[+A] {
 
     suffixes.append(Stream2.apply(Stream2.empty))
   }
+
+  def scanRight[B](z: => B)(f: (A, => B) => B): Stream2[B] = {
+    val initialState = (z, Stream2.apply(z))
+
+    val result = foldRight[(B, Stream2[B])](initialState)(
+      (h, result) => {
+        lazy val lazyResult = result
+        lazy val b = f(h, lazyResult._1)
+        (b, Stream2.cons(b, lazyResult._2))
+      }
+    )
+
+    result._2
+  }
 }
 
 case object Empty extends Stream2[Nothing]

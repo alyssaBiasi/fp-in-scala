@@ -182,6 +182,15 @@ class Stream2Spec extends Specification {
         stream.tails.map(_.toList).toList must containTheSameElementsAs(expected)
       }
     }
+
+    "scanRight" should {
+      "returns the result" in {
+        val stream = Stream2.apply(1,2,3)
+        val expected = List(6, 5, 3, 0)
+
+        stream.scanRight(0)(_ + _).toList must containTheSameElementsAs(expected)
+      }
+    }
   }
 
 }
