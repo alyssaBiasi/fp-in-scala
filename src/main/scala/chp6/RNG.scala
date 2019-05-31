@@ -5,6 +5,32 @@ trait RNG {
 }
 
 object RNG {
+  type Rand[+A] = RNG => (A, RNG)
+
+  def unit[A](a: A): Rand[A] = {
+    rng => (a, rng)
+  }
+
+  def map[A, B](s: Rand[A])(f: A => B): Rand[B] = {
+    rng => {
+      val (a, rng2) = s(rng)
+      (f(a), rng2)
+    }
+  }
+
+  def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A,B) => C): Rand[C] = {
+    rng => {
+      val (a, r1) = ra(rng)
+      val (b, r2) = rb(r1)
+
+      (f(a,b), r2)
+    }
+  }
+
+  def both[A,B](ra: Rand[A], rb: Rand[B]): Rand[(A,B)] = {
+    map2(ra, rb)((_, _))
+  }
+
   // `Int.Minvalue` is 1 smaller than `-(Int.MaxValue)`
   def nonNegativeInt(rng: RNG): (Int, RNG) = {
     val (i, r) = rng.nextInt
@@ -13,24 +39,22 @@ object RNG {
     (value, r)
   }
 
-  def double(rng: RNG): (Double, RNG) = {
-    val (i, r) = nonNegativeInt(rng)
-    val value = i / (Int.MaxValue.toDouble + 1)
-
-    (value, r)
+  def nonNegativeEven: Rand[Int] = {
+    map(nonNegativeInt)(i => i - i%2)
   }
 
-  def intDouble(rng: RNG): ((Int, Double), RNG) = {
-    val (i, r) = nonNegativeInt(rng)
-    val (d, r2) = double(r)
-
-    ((i, d), r2)
+  def double: Rand[Double] = {
+    map(nonNegativeInt)(i => i / (Int.MaxValue.toDouble + 1))
   }
 
-  def doubleInt(rng: RNG): ((Double, Int), RNG) = {
-    val (value, r) = intDouble(rng)
+  def int: Rand[Int] = _.nextInt
 
-    (value.swap, r)
+  def intDouble(rng: RNG): Rand[(Int, Double)] = {
+    both(int, double)
+  }
+
+  def doubleInt(rng: RNG): Rand[(Double, Int)] = {
+    both(double, int)
   }
 
   def double3(rng: RNG): ((Double, Double, Double), RNG) = {
@@ -42,11 +66,11 @@ object RNG {
   }
 
   def ints(count: Int)(rng: RNG): (List[Int], RNG) = {
-    if(count == 0)
+    if (count == 0)
       (Nil, rng)
     else {
       val (i, r) = nonNegativeInt(rng)
-      val (xs, r2) = ints(count-1)(r)
+      val (xs, r2) = ints(count - 1)(r)
 
       (i :: xs, r2)
     }
